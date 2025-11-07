@@ -1,12 +1,12 @@
-/**
- * Сырая версия заметки.
- * 
- * Пока что можно:
- * - Просто текст.
- * - Нет привязки к пользователю или занятию. (но опять таки если хочется)
- * 
- * В перспективе:
- * - Добавить userId и lessonId (или ссылку на Lesson).
- * - Поддержка нескольких заметок на одно занятие.
- * - Дата создания/редактирования.
- */
+package model;
+
+public class Note {
+    private String text;
+
+    public Note(String text) {
+        this.text = text;
+    }
+
+    public String getText() { return text; }
+    public void setText(String text) { this.text = text; }
+}
