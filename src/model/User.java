@@ -1,12 +1,20 @@
-/**
- * Первая версия модели пользователя.
- * 
- * Пока что можно сделать:
- * - Просто хранит логин, пароль и роль.
- * - Роль задаётся строкой (в перспективе — enum).
- * 
- * В перспективе:
- * - Заменить String role на enum UserRole (STUDENT, HEADMAN, ADMIN).
- * - Добавить ID пользователя (для связей с заметками и расписанием).
- * - Реализовать безопасное хранение пароля (хэширование).
- */
+package model;
+
+public class User {
+    private String login;
+    private String password;
+    private String role; // "student", "headman", "admin"
+
+    public User(String login, String password, String role) {
+        this.login = login;
+        this.password = password;
+        this.role = role;
+    }
+
+    // Геттеры
+    public String getLogin() { return login; }
+    public String getPassword() { return password; }
+    public String getRole() { return role; }
+
+    // TODO: добавить equals(), hashCode(), toString() позже
+}
