@@ -1,16 +1,25 @@
 package service;
 
 import model.User;
-import java.util.Scanner;
+import data.UserRepository;
 
 public class AuthService {
-    public void start() {
-        Scanner sc = new Scanner(System.in);
-        System.out.print("Введите логин: ");
-        String login = sc.nextLine();
-        System.out.print("Введите пароль: ");
-        String password = sc.nextLine();
-        System.out.println("Авторизация успешна (заглушка).");
-        sc.close();
+    private final UserRepository userRepository = new UserRepository();
+    private User currentUser = null;
+
+    public User login(String login, String password) {
+        if (userRepository.validatePassword(login, password)) {
+            currentUser = userRepository.findByLogin(login);
+            return currentUser;
+        }
+        return null;
+    }
+
+    public User getCurrentUser() {
+        return currentUser;
+    }
+
+    public void logout() {
+        currentUser = null;
     }
 }
