@@ -1,21 +1,28 @@
 package data;
 
 import model.User;
-import java.util.ArrayList;
+import model.UserRole;
 import java.util.List;
 
 public class UserRepository {
-    private List<User> users = new ArrayList<>();
+    private final Map<String, User> users = new HashMap<>();
 
-    public UserRepository() {
-        // Тестовые данные
-        users.add(new User("student", "1234", "student"));
-        users.add(new User("admin", "admin", "admin"));
+    public UserRepository() {// тестовые данные
+        users.put("student", new User("student", "1234", UserRole.STUDENT));
+        users.put("headman", new User("headman", "headman", UserRole.HEADMAN));
+        users.put("admin", new User("admin", "admin", UserRole.ADMIN));
+    }
+    
+    public User findByLogin(String login) {  //поиск по логину
+        return users.get(login);
     }
 
-    public List<User> getAllUsers() {
-        return new ArrayList<>(users); // защита от изменения извне
+    public boolean validatePassword(String login, String password) { //проверка пароля
+        User user = findByLogin(login);
+        return user != null && user.getPassword().equals(password);
     }
 
-    // добавить метод findByLogin(String login)
+    public Collection<User> getAllUsers() {
+        return users.values();
+    }
 }
