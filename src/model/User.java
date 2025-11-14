@@ -10,22 +10,29 @@
  * - Реализовать безопасное хранение пароля типо хэширование.
  */
 
+/* переопределила метод String! Пароль теперь не выводится*/
 package model;
 
 public class User {
     private String login;
     private String password;
-    private String role; // студент, староста, админ
+    private UserRole role;
 
-    public User(String login, String password, String role) {
+    public User(String login, String password, UserRole role) {
         this.login = login;
         this.password = password;
         this.role = role;
     }
-    
+
     public String getLogin() { return login; }
     public String getPassword() { return password; }
-    public String getRole() { return role; }
+    public UserRole getRole() { return role; }
 
-    
+    @Override
+    public String toString() {
+        return "User{" +
+                "login='" + login + '\'' +
+                ", role=" + role +
+                '}';
+    }
 }
