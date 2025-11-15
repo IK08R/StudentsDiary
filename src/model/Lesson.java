@@ -43,7 +43,6 @@ public class Lesson {
     public String getEndTime() { return endTime; }
     public WeekType getWeekType() { return weekType; }
 
-    @Override
     public String toString() {
         return String.format("%s | %s–%s | %s (%s) | %s неделя",
                 subject, startTime, endTime, room, teacher, weekType == WeekType.EVEN ? "Чётная" : "Нечётная");
