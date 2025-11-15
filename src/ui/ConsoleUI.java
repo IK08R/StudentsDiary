@@ -18,7 +18,7 @@ public class ConsoleUI {
     }
 
     public void start() {
-        System.out.println("=== Ежедневник студента ===");
+        System.out.println("Ежедневник студента");
         if (!performLogin()) {
             System.out.println("Не удалось войти. Завершение.");
             return;
