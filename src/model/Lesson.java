@@ -1,30 +1,21 @@
-/**
- * версия занятия (пары).
- * 
- * Пока что можно:
- * - Хранит просто базовые поля.
- * - Пока нет привязки к пользователю или неделе.
- * 
- * в перспективе:
- * - Добавить WeekType (чётная/нечётная неделя).
- * - Добавить userId — для персонализации расписания.
- */
-
-
-
 package model;
 
+// Модель пары
 public class Lesson {
-    private String subject;
-    private String teacher;
-    private String room;
-    private String dayOfWeek; // "Понедельник", "Вторник"...
-    private String startTime;
-    private String endTime;
-    private WeekType weekType; // EVEN или ODD
+    private int id;
+    private int userId;          // чей урок
+    private String subject;      // предмет
+    private String teacher;      // преподаватель
+    private String room;         // аудитория
+    private String dayOfWeek;    // день недели
+    private String startTime;    
+    private String endTime;      
+    private String weekType;     // чет и нечет
 
-    public Lesson(String subject, String teacher, String room, String dayOfWeek,
-                  String startTime, String endTime, WeekType weekType) {
+    public Lesson(int id, int userId, String subject, String teacher, String room,
+                  String dayOfWeek, String startTime, String endTime, String weekType) {
+        this.id = id;
+        this.userId = userId;
         this.subject = subject;
         this.teacher = teacher;
         this.room = room;
@@ -34,19 +25,13 @@ public class Lesson {
         this.weekType = weekType;
     }
 
-    // Геттеры
+    public int getId() { return id; }
+    public int getUserId() { return userId; }
     public String getSubject() { return subject; }
     public String getTeacher() { return teacher; }
     public String getRoom() { return room; }
     public String getDayOfWeek() { return dayOfWeek; }
     public String getStartTime() { return startTime; }
     public String getEndTime() { return endTime; }
-    public WeekType getWeekType() { return weekType; }
-
-    @Override
-    public String toString() {
-        return String.format("%s | %s–%s | %s (%s) | %s неделя",
-                subject, startTime, endTime, room, teacher, weekType == WeekType.EVEN ? "Чётная" : "Нечётная");
-    }
+    public String getWeekType() { return weekType; }
 }
-
