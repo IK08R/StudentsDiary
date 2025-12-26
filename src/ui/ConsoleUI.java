@@ -76,10 +76,75 @@ public class ConsoleUI {
     }
 
     private void showSchedule() {
-        System.out.println("\n~~~ Чётная неделя ~~~");
-        printLessons(scheduleService.getScheduleForWeek("EVEN"));
-        System.out.println("\n~~~ Нечётная неделя ~~~");
-        printLessons(scheduleService.getScheduleForWeek("ODD"));
+    System.out.println("\n~ Чётная неделя ~");
+    printScheduleAsTable(scheduleService.getScheduleForWeek("EVEN"));
+
+    System.out.println("\n~ Нечётная неделя ~");
+    printScheduleAsTable(scheduleService.getScheduleForWeek("ODD"));
+}
+
+    private void printScheduleAsTable(ArrayList<Lesson> lessons) {
+        String[] days = {"Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"};
+    
+         // Соберём все временные слоты (сортировка по времени)
+        java.util.Set<String> timeSlots = new java.util.TreeSet<>();
+        for (Lesson l : lessons) {
+            timeSlots.add(l.getStartTime() + "–" + l.getEndTime());
+        }
+
+        if (timeSlots.isEmpty()) {
+            System.out.println("  Нет занятий.");
+            return;
+        }
+
+        java.util.List<String> sortedTimes = new java.util.ArrayList<>(timeSlots);
+    
+        // Таблица: время -> (день -> предмет)
+        java.util.Map<String, java.util.Map<String, String>> table = new java.util.HashMap<>();
+        for (String time : sortedTimes) {
+            table.put(time, new java.util.HashMap<>());
+            for (String day : days) {
+                table.get(time).put(day, "");
+            }
+            }
+
+        // Заполняем данные
+        for (Lesson l : lessons) {
+            String timeKey = l.getStartTime() + "–" + l.getEndTime();
+            String day = l.getDayOfWeek();
+            String subject = l.getSubject();
+            if (table.containsKey(timeKey) && table.get(timeKey).containsKey(day)) {
+                table.get(timeKey).put(day, subject);
+            }
+        }
+
+        // Ширина колонок
+        int timeColWidth = 14;
+        int dayColWidth = 16;
+
+        // Заголовок
+        System.out.printf("%-" + timeColWidth + "s", "Время");
+        for (String day : days) {
+            System.out.printf("%-" + dayColWidth + "s", day);
+        }
+        System.out.println();
+
+        // Строки по времени
+        for (String time : sortedTimes) {
+            System.out.printf("%-" + timeColWidth + "s", time);
+            for (String day : days) {
+                String subject = table.get(time).get(day);
+                 if (subject.isEmpty()) {
+                     System.out.printf("%-" + dayColWidth + "s", "");
+                } else {
+                    if (subject.length() > dayColWidth - 1) {
+                        subject = subject.substring(0, dayColWidth - 2) + "…";
+                    }
+                    System.out.printf("%-" + dayColWidth + "s", subject);
+                }
+            }
+            System.out.println();
+        }
     }
 
     private void printLessons(ArrayList<Lesson> lessons) {
