@@ -11,6 +11,7 @@ public class Lesson {
     private String startTime;    
     private String endTime;      
     private String weekType;     // чет и нечет
+    private String noteText;
 
     public Lesson(int id, int userId, String subject, String teacher, String room,
                   String dayOfWeek, String startTime, String endTime, String weekType) {
@@ -34,4 +35,12 @@ public class Lesson {
     public String getStartTime() { return startTime; }
     public String getEndTime() { return endTime; }
     public String getWeekType() { return weekType; }
+    public String getNoteText() {
+        return noteText;
+    }
+
+    // сеттер 
+    public void setNoteText(String noteText) {
+    this.noteText = noteText;
+    }
 }

@@ -81,84 +81,109 @@ public class ConsoleUI {
 
     System.out.println("\n~ Нечётная неделя ~");
     printScheduleAsTable(scheduleService.getScheduleForWeek("ODD"));
-}
+    }
 
-    private void printScheduleAsTable(ArrayList<Lesson> lessons) {
-        String[] days = {"Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"};
+        private void printScheduleAsTable(ArrayList<Lesson> lessons) {
+    String[] days = {"Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"};
     
-         // Соберём все временные слоты (сортировка по времени)
-        java.util.Set<String> timeSlots = new java.util.TreeSet<>();
-        for (Lesson l : lessons) {
-            timeSlots.add(l.getStartTime() + "–" + l.getEndTime());
-        }
+    // Сбор уникальных временных слотов с нормализацией
+    java.util.Set<String> timeSlotSet = new java.util.HashSet<>();
+    for (Lesson l : lessons) {
+        String start = normalizeTimeForSorting(l.getStartTime());
+        String end = normalizeTimeForSorting(l.getEndTime());
+        timeSlotSet.add(start + "–" + end);
+    }
 
-        if (timeSlots.isEmpty()) {
-            System.out.println("  Нет занятий.");
-            return;
-        }
+    if (timeSlotSet.isEmpty()) {
+        System.out.println("  Нет занятий.");
+        return;
+    }
 
-        java.util.List<String> sortedTimes = new java.util.ArrayList<>(timeSlots);
-    
-        // Таблица: время -> (день -> предмет)
-        java.util.Map<String, java.util.Map<String, String>> table = new java.util.HashMap<>();
-        for (String time : sortedTimes) {
-            table.put(time, new java.util.HashMap<>());
-            for (String day : days) {
-                table.get(time).put(day, "");
-            }
-            }
+    // Сортируем как время
+    java.util.List<String> sortedTimes = new java.util.ArrayList<>(timeSlotSet);
+    sortedTimes.sort((a, b) -> {
+        String[] a1 = a.split("–")[0].split(":");
+        String[] b1 = b.split("–")[0].split(":");
+        int ha = Integer.parseInt(a1[0]), ma = Integer.parseInt(a1[1]);
+        int hb = Integer.parseInt(b1[0]), mb = Integer.parseInt(b1[1]);
+        if (ha != hb) return Integer.compare(ha, hb);
+        return Integer.compare(ma, mb);
+    });
 
-        // Заполняем данные
-        for (Lesson l : lessons) {
-            String timeKey = l.getStartTime() + "–" + l.getEndTime();
-            String day = l.getDayOfWeek();
-            String subject = l.getSubject();
-            if (table.containsKey(timeKey) && table.get(timeKey).containsKey(day)) {
-                table.get(timeKey).put(day, subject);
-            }
-        }
-
-        // Ширина колонок
-        int timeColWidth = 14;
-        int dayColWidth = 16;
-
-        // Заголовок
-        System.out.printf("%-" + timeColWidth + "s", "Время");
+    // Таблица: время -> день -> {предмет+аудитория, заметка}
+    java.util.Map<String, java.util.Map<String, String[]>> table = new java.util.HashMap<>();
+    for (String time : sortedTimes) {
+        table.put(time, new java.util.HashMap<>());
         for (String day : days) {
-            System.out.printf("%-" + dayColWidth + "s", day);
+            table.get(time).put(day, new String[]{"", ""});
+        }
+    }
+
+    // Заполняем
+    for (Lesson l : lessons) {
+        String start = normalizeTimeForSorting(l.getStartTime());
+        String end = normalizeTimeForSorting(l.getEndTime());
+        String timeKey = start + "–" + end;
+        String day = l.getDayOfWeek();
+
+        String subject = l.getSubject() != null ? l.getSubject() : "";
+        if (l.getRoom() != null && !l.getRoom().trim().isEmpty()) {
+            subject += " (" + l.getRoom() + ")";
+        }
+
+        String note = (l.getNoteText() != null) ? l.getNoteText().trim() : "";
+        table.get(timeKey).put(day, new String[]{subject, note});
+    }
+
+    int timeColWidth = 14;
+    int dayColWidth = 20;
+
+    // Заголовок
+    System.out.printf("%-" + timeColWidth + "s", "Время");
+    for (String day : days) {
+        System.out.printf("%-" + dayColWidth + "s", day);
+    }
+    System.out.println();
+
+    // Вывод
+    for (String time : sortedTimes) {
+        // Строка 1: предмет + аудитория
+        System.out.printf("%-" + timeColWidth + "s", time);
+        for (String day : days) {
+            String s = table.get(time).get(day)[0];
+            if (s.length() > dayColWidth - 1) s = s.substring(0, dayColWidth - 2) + "…";
+            System.out.printf("%-" + dayColWidth + "s", s);
         }
         System.out.println();
 
-        // Строки по времени
-        for (String time : sortedTimes) {
-            System.out.printf("%-" + timeColWidth + "s", time);
-            for (String day : days) {
-                String subject = table.get(time).get(day);
-                 if (subject.isEmpty()) {
-                     System.out.printf("%-" + dayColWidth + "s", "");
-                } else {
-                    if (subject.length() > dayColWidth - 1) {
-                        subject = subject.substring(0, dayColWidth - 2) + "…";
-                    }
-                    System.out.printf("%-" + dayColWidth + "s", subject);
-                }
+        // Строка 2: заметка — ТОЛЬКО если она есть
+        boolean hasNote = false;
+        String[] notes = new String[days.length];
+        for (int i = 0; i < days.length; i++) {
+            notes[i] = table.get(time).get(days[i])[1];
+            if (!notes[i].isEmpty()) hasNote = true;
+        }
+
+        if (hasNote) {
+            System.out.printf("%-" + timeColWidth + "s", ""); 
+            for (String n : notes) {
+                if (n.length() > dayColWidth - 1) n = n.substring(0, dayColWidth - 2) + "…";
+                System.out.printf("%-" + dayColWidth + "s", n);
             }
             System.out.println();
         }
     }
+}
 
-    private void printLessons(ArrayList<Lesson> lessons) {
-        if (lessons.isEmpty()) {
-            System.out.println("  Нет занятий.");
-        } else {
-            for (Lesson l : lessons) {
-                System.out.println("  " + l.getSubject() + " | " + l.getDayOfWeek() +
-                        " " + l.getStartTime() + "-" + l.getEndTime() +
-                        " | " + l.getRoom());
-            }
-        }
+// Вспомогательный метод 
+private String normalizeTimeForSorting(String time) {
+    if (time == null) return "00:00";
+    time = time.trim();
+    if (time.matches("\\d:\\d\\d")) {
+        return "0" + time;
     }
-
+    return time;
+}
     private void addLesson() {
         System.out.print("Предмет: ");
         String subject = scanner.nextLine();
